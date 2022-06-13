@@ -1,0 +1,87 @@
+Вывод данных в скл
+Имеется таблица в базе данных Microsoft SQL Server с информацией о факультетах университета.Эти данные будем выводить в элемент DataGridView, расположенный на Windows Forms.
+Создадим новый проект Windows Forms на Visual C# в Visual Studio. На форме расположим элемент управления DataGridView 
+— для этого перетащите его с «Панели элементов» на макет окна.
+Добавим в DataGridView три столбца под три соответствующих колонки из таблицы БД с помощью кнопки «Правка столбцов».
+Для наглядности назовём их так же, как называются поля в таблице базы данных.
+Переходим к написанию кода. Вся функциональность по чтению данных из БД и их последующему выводу в DataGridView реализована в методе LoadData().
+ public Form1()
+    {
+        InitializeComponent();
+ 
+        LoadData();
+    }
+ 
+    private void LoadData()
+    {
+        string connectString = "Data Source=.\\SQLEXPRESS;Initial Catalog=LSTU_Schedule_autumn20172018;" +
+            "Integrated Security=true;";
+ 
+        SqlConnection myConnection = new SqlConnection(connectString);
+ 
+        myConnection.Open();
+ 
+        string query = "SELECT * FROM Faculty ORDER BY fac_id";
+ 
+        SqlCommand command = new SqlCommand(query, myConnection);
+ 
+        SqlDataReader reader = command.ExecuteReader();
+ 
+        List<string[]> data = new List<string[]>();
+ 
+        while (reader.Read())
+        {
+            data.Add(new string[3]);
+ 
+            data[data.Count - 1][0] = reader[0].ToString();
+            data[data.Count - 1][1] = reader[1].ToString();
+            data[data.Count - 1][2] = reader[2].ToString();
+        }
+ 
+        reader.Close();
+ 
+        myConnection.Close();
+ 
+        foreach (string[] s in data)
+            dataGridView1.Rows.Add(s);
+    }
+}
+Объявление переменной со строкой подключения к базе данных:
+string connectString = "Data Source=.\\SQLEXPRESS;Initial Catalog=LSTU_Schedule_autumn20172018;" +
+    "Integrated Security=true;";
+Создание объекта для подключения к БД:
+SqlConnection myConnection = new SqlConnection(connectString);
+Соединение с БД:
+myConnection.Open();
+Запрос на получение данных из таблицы с факультетами:
+string query = "SELECT * FROM Faculty ORDER BY fac_id";
+Создание объекта, выполняющего запрос к БД:
+SqlCommand command = new SqlCommand(query, myConnection);
+Получение объекта для чтения данных из БД, содержащих несколько строк и столбцов:
+SqlDataReader reader = command.ExecuteReader();
+Создание списка List для хранения полученных данных. Каждая строка будет представлена элементом списка, а столбец — элементом строкового массива string[]:
+List<string[]> data = new List<string[]>();
+В цикле построчно читаем данные строки (каждого её столбца), предварительно создав новый элемент списка List:
+while (reader.Read())
+{
+    data.Add(new string[3]);
+ 
+    data[data.Count - 1][0] = reader[0].ToString();
+    data[data.Count - 1][1] = reader[1].ToString();
+    data[data.Count - 1][2] = reader[2].ToString();
+}
+Закрываем SqlDataReader:
+reader.Close();
+Разрываем соединение с базой данных:
+myConnection.Close();
+В цикле foreach добавляем новые строки в DataGridView с помощью метода Add. Элементами строки являются столбцы, заполняемые из строкового массива, 
+содержащегося в конкретном элементе списка List:
+foreach (string[] s in data)
+    dataGridView1.Rows.Add(s);
+    Запустим программу и посмотрим её в работе.
+ Самый быстрый способ перенести файл Excel в SQL - это использовать мастер импорта: Открыть SSMS (SQL Server Management Studio) 
+ и подключитесь к базе данных, в которую вы хотите импортировать файл. Импортировать данные: в SSMS в обозревателе объектов
+ в разделе «Базы данных» щелкните правой кнопкой мыши целевую базу данных, выберите Задачи, Импорт данных.
+ Появится мастер импорта (обычно вы можете просто нажать «Далее» на первом экране).
+ ВДРУГ ПРОПАДЕТ
+ Чтобы открыть панель элементов, выберите Вид > Панель элементов в строке меню или нажмите клавиши Ctrl + ALT + X.
